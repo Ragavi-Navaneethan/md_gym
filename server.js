@@ -1,15 +1,18 @@
+require("dotenv").config();
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const app = express();
 
-
-app.use(express.json());
-mongoose.connect(
-    "mongodb+srv://sripushparagavi27_db_user:welcome123@cluster0.sap636j.mongodb.net/gym-user?retryWrites=true&w=majority&appName=Cluster0"
-  )
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error("DB Error:", err));
+  .catch(err => console.error(err));
+/*app.use(express.json());
+mongoose.connect(process.env.MONGO_URI);
+ // .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("DB Error:", err));*/
 
 const Signup=mongoose.model('Signup',new mongoose.Schema({
   mailId:{type:String,required:true,unique:true},
