@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const app = express();
 
+
 app.use(express.json());
 mongoose.connect(
     "mongodb+srv://sripushparagavi27_db_user:welcome123@cluster0.sap636j.mongodb.net/gym-user?retryWrites=true&w=majority&appName=Cluster0"
@@ -11,36 +12,36 @@ mongoose.connect(
   .catch((err) => console.error("DB Error:", err));
 
 const Signup=mongoose.model('Signup',new mongoose.Schema({
-  mailId: {type:String,required:true,unique:true},
-  phoneNumber: {type:String,required:true},
-  username: {type:String,required:true},
-  password: {type:String,required:true},
-  confirmPassword: {type:String,required:true} 
+  mailId:{type:String,required:true,unique:true},
+  phoneNumber:{type:String,required:true},
+  username:{type:String,required:true},
+  password:{type:String,required:true},
+  confirmPassword:{type:String,required:true} 
 }));
 const User=mongoose.model('User',new mongoose.Schema({
-  username: {type:String,required:true},
-  email: {type:String,required:true,unique:true},
-  password: {type:String,required:true}
+  username:{type:String,required:true},
+  email:{type:String,required:true,unique:true},
+  password:{type:String,required:true}
 }));
 const Workout = mongoose.model('Workout',new mongoose.Schema({
-  workoutName: {type: String,required: true},
-  sets:[{reps: {type: Number,required: true}}]},
+  workoutName:{type: String,required: true},
+  sets:[{reps:{type: Number,required: true}}]},
  {versionKey: false, timestamps: true }));
 
 app.get('/workouts', async (_, res)=>{
   try{
-    const workouts = await Workout.find({});
+    const workouts=await Workout.find({});
     res.json(workouts);
   } catch (err){
-    res.status(500).json({ message:'Server error'});
+    res.status(500).json({message:'Server error'});
   }
 });
-app.post('/workouts', async (req, res)=>{
+app.post('/workouts',async(req, res)=>{
   try{
     const {workoutName,sets}=req.body;
     if (!workoutName||!sets||sets.length===0)
       return res.status(400).json({message:'Workout name and sets are required'});
-    const workout=new Workout({workoutName, sets });
+    const workout=new Workout({workoutName, sets});
     await workout.save();
     res.status(201).json({message:'Workout added successfully'});
   } catch (err){
