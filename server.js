@@ -5,14 +5,11 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const app = express();
 
+app.use(express.json());
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error(err));
-/*app.use(express.json());
-mongoose.connect(process.env.MONGO_URI);
- // .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error("DB Error:", err));*/
 
 const Signup=mongoose.model('Signup',new mongoose.Schema({
   mailId:{type:String,required:true,unique:true},
