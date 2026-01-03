@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
-import 'package:project_one/home_screen.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +13,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Fit',
-      home: const LoginPage(),
+      home: Scaffold(
+        body: Center(
+          child: ElevatedButton(
+            child: const Text("Get Data"),
+            onPressed: () async {
+              final response = await http.get(
+                Uri.parse('http://172.20.10.2:3000/signup'),
+              );
+              print('Response from Node.js: ${response.body}');
+            },
+          ),
+        ),
+      ),
     );
   }
 }
