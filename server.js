@@ -3,30 +3,27 @@ require("dotenv").config();
 const express = require('express');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const cors = require('cors'); 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error(err));
 
-const Signup=mongoose.model('Signup',new mongoose.Schema({
-  mailId:{type:String,required:true,unique:true},
-  phoneNumber:{type:String,required:true},
-  username:{type:String,required:true},
-  password:{type:String,required:true},
-  confirmPassword:{type:String,required:true} 
-}));
-const User=mongoose.model('User',new mongoose.Schema({
-  username:{type:String,required:true},
-  email:{type:String,required:true,unique:true},
-  password:{type:String,required:true}
+const User = mongoose.model('User', new mongoose.Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phoneNumber: { type: String, required: true },
+  password: { type: String, required: true }
 }));
 const Workout = mongoose.model('Workout',new mongoose.Schema({
   workoutName:{type: String,required: true},
   sets:[{reps:{type: Number,required: true}}]},
  {versionKey: false, timestamps: true }));
+
 
 app.get('/workouts', async (_, res)=>{
   try{
@@ -48,38 +45,34 @@ app.post('/workouts',async(req, res)=>{
     res.status(500).json({message:'Server error'});
   }
 });
-app.get('/',(_, res)=>res.send('Server is running'));
-app.get('/signup',async(_,res)=>{
+
+
+app.get('/', (req, res) => {
+  res.send('Backend is running successfully 🚀');
+});
+app.post('/signup', async (req, res) => {
   try {
-    const users = await Signup.find({},{password:0,confirmPassword:0,__v:0});
-    res.json(users);
-  } catch(err){
-    res.status(500).json({message:'Server error'});
-  }
-});
-app.post('/signup',async(req,res)=>{
-  try{
-    const{mailId,phoneNumber,username,password,confirmPassword}=req.body;
-    if (!mailId||!phoneNumber||!username||!password||!confirmPassword)
-      return res.status(400).json({message:'All fields are required'});
-    if (await Signup.findOne({mailId}))
-      return res.status(409).json({message:'Email already registered'});
-    if (password!==confirmPassword)
+    const {email, username, phoneNumber, password, confirmPassword}=req.body;
+    if (!email||!username||!phoneNumber||!password||!confirmPassword){
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    if (password !== confirmPassword){
       return res.status(400).json({message:'Passwords do not match'});
-    const hashedPassword=await bcrypt.hash(password,10);
-    await new Signup({
-      mailId,
-      phoneNumber,
-      username,
-      password: hashedPassword,
-      confirmPassword: hashedPassword
-    }).save();
+    }
+    const existingUser=await User.findOne({email});
+    if (existingUser) {
+      return res.status(409).json({ message:'Email already registered'});
+    }
+    const hashedPassword=await bcrypt.hash(password, 10);
+    await new User({email,username,phoneNumber,password: hashedPassword}).save();
     res.status(201).json({message:'Signup successful'});
-  } catch(err) {
-    console.error('Signup Error:', err);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({message:'Server error'});
   }
 });
+
+  
 app.get('/users',async(_, res)=>{
   try{
     const users=await User.find({},{password:0,__v:0});
@@ -89,18 +82,33 @@ app.get('/users',async(_, res)=>{
   }
 });
 
-app.post('/users',async(req,res)=>{
-  try{
-    const{username,email,password}=req.body;
-    if (!username||!email||!password)
+
+
+
+app.post('/login', async (req, res) => {
+  try {
+    const {email,password}=req.body;
+    console.log("Login email:", email);
+    console.log("Entered password:", password);
+
+    
+    if (!email||!password)
       return res.status(400).json({message:'All fields are required'});
-    if (await User.findOne({email}))
-      return res.status(409).json({message:'Email already registered'});
-    const hashedPassword=await bcrypt.hash(password, 10);
-    await new User({username,email,password:hashedPassword}).save();
-    res.status(201).json({message:'User added successfully'});
-  } catch(err){
-    res.status(500).json({message:'Server error'});
+    const user=await User.findOne({email});
+    if (!user)
+      return res.status(401).json({message:'Invalid email or password'});
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(401).json({message:'Invalid email or password'});
+    res.status(200).json({
+      message: 'Login successful',
+      username: user.username,
+      email: user.email
+    });
+  } catch (err){
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
+
 app.listen(3000,()=>console.log('Server running on port 3000'));

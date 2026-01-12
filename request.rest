@@ -1,34 +1,33 @@
 ### Signup page
-GET http://localhost:3000/signup
-
-
-### Signup page
 POST http://localhost:3000/signup
 Content-Type: application/json
 
 {
-  "mailId": "ragavi@gmail.com",
-  "phoneNumber": "9876543210",
+  "email": "ragavi@gmail.com",
   "username": "Ragavi",
+  "phoneNumber": "9876543210",
   "password": "gym123",
   "confirmPassword": "gym123"
 }
 
 
 
-### Users page
-GET http://localhost:3000/users
-
-
-### Users page
-POST http://localhost:3000/users
+###login page
+POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "Ragavi",
   "email": "ragavi@gmail.com",
-  "password": "12345"
+  "password": "gym123"
 }
+
+
+
+### get all users
+GET http://localhost:3000/users
+
+
+
 
 ### Workout page
 GET http://localhost:3000/workouts
@@ -46,3 +45,7 @@ Content-Type: application/json
     { "reps": 10 }
   ]
 }
+
+
+
+
